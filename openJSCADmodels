@@ -1,0 +1,52 @@
+// units: mm
+
+const main = () => [
+  motor(),
+  motorScrews().translate([0, 0, 40]),
+];
+
+const motor = () => {
+    const h = 30.75;
+    const w = 38.5;
+    
+    return union(
+        // body
+        difference(
+            cube({ 
+                size: [w, w, h],
+                center: [true, true, false],
+                radius: [5, 5, 0],
+            }),
+            motorScrews().translate([0, 0, h -5])
+        ),
+        
+        // spacer
+        cylinder({
+            d: 22, h: 2
+        }).translate([0, 0, h]),
+        
+        // shaft
+        cylinder({ d: 5, h: 20 })
+            .subtract(
+                cube({ 
+                    size: [5, 1, 18],
+                    center: [true, true, false],
+                    
+                })
+                    .translate([0, 2, 2]))
+            .translate([0, 0, h + 2])
+        
+        ).setColor([0.8, 0.8, 0.8]);
+}
+
+const motorScrews = () => union(
+    vertsSquare(31)
+        .map(arr => cylinder({ d: 3.5, h: 5})
+        .translate(arr))
+    );
+
+
+
+const vertsSquare = (diameter) => 
+    [[-0.5, -0.5], [-0.5, 0.5], [0.5, -0.5], [0.5, 0.5]]
+        .map(arr =>  arr.map((n) =>  n * diameter))

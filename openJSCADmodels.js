@@ -3,12 +3,63 @@
 const main = () => [
   motor(),
   slipring().translate([0, 0, 35]),
-  bearingLarge(),
-  bearingSmall().translate([80, 0, 0]),
+  bearingLarge().translate([0, 0, 38]),
+  // bearingSmall().translate([80, 0, 0]),
+
+  base().subtract(bearingLarge().translate([0, 0, 38])),
   // motorScrews().translate([0, 0, 40]),
 ];
 
 const fn = 100;
+
+
+const base = () => color('blue',
+  union(
+    difference(
+      cube({ size: [40, 40, 2], center: [true, true, false] }),
+      cylinder({ h: 3, d: 23 }),
+      motorScrews()
+    ),
+    arrangeInCircle({
+      items: range(4).map(n => union(
+        rotate( // arm  TODO: going to need more clearance under inner ring so that the arm for next gimbal can clamp on
+          [0, -5, 0],
+          cube({
+            size: [30, 15, 5],
+            center: [false, true, false],
+            radius: 2,
+            fn: 10,
+          })),
+        translate( // bearing holder nub
+          [26, 0, 0],
+          difference(
+            cube({
+              size: [10, 15, 15],
+              center: [true, true, false],
+              radius: 2,
+              fn: 10,
+            }),
+            cube({
+              size: [5, 15, 10],
+              center: [false, true, false],
+            }).translate([-5, 0, 8.5])
+          )
+        )
+      )),
+      r: 12
+    }),
+    difference(
+      cylinder({ h: 2.3, d: 44.5 }),
+      slipringScrews(),
+      cylinder({ d: 23, h: 3 })
+    ).translate([0, 0, 15]),
+    rotate(
+      [0, 0, 180],
+      arrangeInCircle({
+      items: range(3).map(n => cylinder({ d: 8, h: 16 })),
+      r: 16,
+    }))
+  ).translate([0, 0, 30.75]));
 
 const bearing = ({ h, dInnerInner, dInnerOuter, dOuterInner, dOuterOuter, numBalls, rBalls }) =>
   union(
@@ -36,11 +87,13 @@ const ring = ({ dInner, dOuter, h }) => difference(
   cylinder({ d: dInner, h, fn })
 );
 
+const rad = 180 / Math.PI;
+
 const arrangeInCircle = ({ items, r }) => {
   const dTheta = (Math.PI * 2) / items.length;
   return items.map((item, i) => translate(
     [r * Math.cos(i * dTheta), r * Math.sin(i * dTheta)],
-    item
+    rotate([0, 0, i * dTheta * rad], item)
   ));
 };
 
@@ -64,20 +117,20 @@ const bearingSmall = () => bearing({
   rBalls: 3.75,
 });
 
+const slipringScrews = () => union(arrangeInCircle({
+  items: range(3).map(n => cylinder({ d: 5.45, h: 3 })),
+  r: 18,
+}));
+
 const slipring = () => {
   const dCyl = 22;
 
   return union(
     translate(
-      [0, 0, 5.8],
+      [0, 0, 13],
       difference(
         cylinder({ h: 2.3, d: 44.5 }),
-        union(
-          arrangeInCircle({
-            items: range(3).map(n => cylinder({ d: 5.45, h: 3 })),
-            r: 18,
-          })
-        ),
+        slipringScrews(),
         cylinder({ d: dCyl, h: 3 })
       )
     ),

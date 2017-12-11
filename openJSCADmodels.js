@@ -30,7 +30,7 @@ const base = () => color('blue',
             radius: 2,
             fn: 10,
           })),
-        translate( // bearing holder nub
+        translate( // bearing holder nub // TODO: extend to clamp top for more support
           [26, 0, 0],
           difference(
             cube({
